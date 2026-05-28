@@ -3,7 +3,37 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>自訂 QR Code 產生器</title>
+  <title>自訂 QR Code 產生器 — 免費線上工具</title>
+
+  <!-- ═══ [1] SEO & Social Sharing ═══ -->
+  <meta name="description" content="免費線上 QR Code 產生器：支援網址、純文字、Wi-Fi、Email。可自訂樣式、嵌入 Logo、匯出 PNG/SVG。所有資料僅在瀏覽器本機處理，無需上傳。" />
+  <meta name="keywords" content="QR Code,產生器,免費,線上工具,Wi-Fi QR,Logo QR,SVG,PNG" />
+  <meta name="author" content="QR Code Generator" />
+  <link rel="canonical" href="https://YOUR_USERNAME.github.io/qr-code-generator/" />
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="自訂 QR Code 產生器" />
+  <meta property="og:description" content="免費線上 QR Code 工具：自訂樣式、嵌入 Logo、支援 Wi-Fi / Email。資料不離開瀏覽器。" />
+  <meta property="og:url" content="https://YOUR_USERNAME.github.io/qr-code-generator/" />
+  <meta property="og:image" content="https://YOUR_USERNAME.github.io/qr-code-generator/assets/images/og-preview.png" />
+  <meta property="og:locale" content="zh_TW" />
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="自訂 QR Code 產生器" />
+  <meta name="twitter:description" content="免費線上 QR Code 工具：自訂樣式、嵌入 Logo、支援 Wi-Fi / Email。" />
+  <meta name="twitter:image" content="https://YOUR_USERNAME.github.io/qr-code-generator/assets/images/og-preview.png" />
+
+  <!-- Favicon (inline SVG) -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect x='2' y='2' width='12' height='12' rx='2' fill='%236366f1'/><rect x='18' y='2' width='12' height='12' rx='2' fill='%236366f1'/><rect x='2' y='18' width='12' height='12' rx='2' fill='%236366f1'/><rect x='20' y='20' width='8' height='8' rx='1' fill='%238b5cf6'/></svg>" type="image/svg+xml" />
+
+  <!-- [3] PWA -->
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#6366f1" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="QR 產生器" />
 
   <!-- ═══ Content Security Policy ═══ -->
   <meta http-equiv="Content-Security-Policy"
@@ -12,7 +42,8 @@
                  style-src 'self' 'unsafe-inline';
                  img-src 'self' data: blob:;
                  font-src 'self';
-                 connect-src 'none';
+                 connect-src 'self';
+                 manifest-src 'self';
                  form-action 'none';
                  base-uri 'self';" />
 
@@ -20,11 +51,18 @@
   <meta http-equiv="X-Content-Type-Options" content="nosniff" />
   <meta name="referrer" content="no-referrer" />
 
+  <!-- ═══ [4] Performance: Preload critical resources ═══ -->
+  <link rel="preload" href="assets/css/style.css" as="style" />
+  <link rel="preload" href="assets/js/qr-code-styling.js" as="script" />
+
   <!-- ═══ Production CSS (compiled Tailwind) ═══ -->
   <link rel="stylesheet" href="assets/css/style.css" />
 
   <!-- ═══ Local JS (no external CDN) ═══ -->
   <script src="assets/js/qr-code-styling.js" defer></script>
+
+  <!-- ═══ [9] Version meta ═══ -->
+  <meta name="version" content="1.0.0" />
 
   <style>
     /* ── Custom scrollbar ── */
@@ -35,6 +73,28 @@
     /* ── Smooth transitions ── */
     input, select, button, .panel { transition: all 0.3s ease; }
     .panel:hover { box-shadow: 0 8px 30px rgba(0,0,0,0.08); }
+
+    /* ── [2] a11y: Focus visible ring ── */
+    :focus-visible {
+      outline: 3px solid #6366f1;
+      outline-offset: 2px;
+      border-radius: 4px;
+    }
+    /* ── [2] a11y: Skip link ── */
+    .skip-link {
+      position: absolute; left: -9999px; top: auto;
+      padding: 8px 16px; background: #6366f1; color: #fff;
+      font-size: 0.875rem; z-index: 100; border-radius: 0 0 8px 0;
+    }
+    .skip-link:focus { left: 0; top: 0; }
+
+    /* ── [2] a11y: Reduced motion ── */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
 
     /* ── Range slider ── */
     input[type="range"] {
@@ -49,6 +109,11 @@
       transition: transform 0.2s ease;
     }
     input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.2); }
+    /* Firefox */
+    input[type="range"]::-moz-range-thumb {
+      width: 18px; height: 18px; border-radius: 50%;
+      background: #6366f1; cursor: pointer; border: none;
+    }
 
     /* ── Color input ── */
     input[type="color"] {
@@ -75,40 +140,53 @@
     }
     .active-ec  { background: #eef2ff; border-color: #6366f1 !important; color: #4f46e5 !important; font-weight: 700; }
     .active-fmt { background: #eef2ff; border-color: #6366f1 !important; color: #4f46e5 !important; font-weight: 700; }
+
+    /* ── [3] PWA install banner ── */
+    #pwa-install-banner {
+      display: none;
+      position: fixed; bottom: 1rem; right: 1rem; z-index: 100;
+    }
+    #pwa-install-banner.show { display: block; }
   </style>
 </head>
 <body class="bg-gradient-to-br from-slate-50 to-indigo-50 min-h-screen">
 
+  <!-- ═══ [2] a11y: Skip navigation link ═══ -->
+  <a href="#main-content" class="skip-link">跳至主要內容</a>
+
   <!-- ════════ Header ════════ -->
-  <header class="bg-white/80 backdrop-blur-md border-b border-slate-200 sticky top-0 z-50">
-    <div class="max-w-7xl mx-auto px-4 py-4 flex items-center gap-3">
-      <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
-        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
-        </svg>
+  <header class="bg-white/80 backdrop-blur-md border-b border-slate-200 sticky top-0 z-50" role="banner">
+    <div class="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center" aria-hidden="true">
+          <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
+          </svg>
+        </div>
+        <div>
+          <h1 class="text-xl font-bold text-slate-800">自訂 QR Code 產生器</h1>
+          <p class="text-xs text-slate-400">即時預覽 · 多種樣式 · 嵌入 Logo</p>
+        </div>
       </div>
-      <div>
-        <h1 class="text-xl font-bold text-slate-800">自訂 QR Code 產生器</h1>
-        <p class="text-xs text-slate-400">即時預覽 · 多種樣式 · 嵌入 Logo</p>
-      </div>
+      <!-- [9] Version badge -->
+      <span class="text-[0.6rem] text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full hidden sm:inline" aria-label="版本號 1.0.0">v1.0.0</span>
     </div>
   </header>
 
   <!-- ════════ Main 3-Column Grid ════════ -->
-  <main class="max-w-7xl mx-auto px-4 py-6 grid grid-cols-1 lg:grid-cols-[300px_1fr_320px] gap-6">
+  <main id="main-content" class="max-w-7xl mx-auto px-4 py-6 grid grid-cols-1 lg:grid-cols-[300px_1fr_320px] gap-6" role="main">
 
     <!-- ═══ LEFT: Input Panel ═══ -->
-    <section class="panel bg-white rounded-2xl shadow-sm border border-slate-200 p-5 space-y-5 h-fit lg:sticky lg:top-24">
-      <h2 class="text-sm font-bold text-slate-700 flex items-center gap-2">
-        <svg class="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+    <section class="panel bg-white rounded-2xl shadow-sm border border-slate-200 p-5 space-y-5 h-fit lg:sticky lg:top-24" aria-labelledby="section-input">
+      <h2 id="section-input" class="text-sm font-bold text-slate-700 flex items-center gap-2">
+        <svg class="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
         資料輸入
       </h2>
 
-      <!-- Data Type Selector -->
       <div>
         <label class="field-label" for="data-type">資料類型</label>
-        <select id="data-type"
+        <select id="data-type" aria-label="選擇 QR Code 資料類型"
                 class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-700 focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 outline-none">
           <option value="url">&#128279; 網址 (URL)</option>
           <option value="text">&#128221; 純文字</option>
@@ -117,42 +195,40 @@
         </select>
       </div>
 
-      <!-- Dynamic Input Container -->
-      <div id="dynamic-inputs" class="space-y-4 fade-in"></div>
+      <div id="dynamic-inputs" class="space-y-4 fade-in" role="group" aria-label="動態輸入欄位"></div>
     </section>
 
     <!-- ═══ CENTER: Preview & Actions ═══ -->
-    <section class="flex flex-col items-center gap-5">
-      <!-- QR Preview Card -->
+    <section class="flex flex-col items-center gap-5" aria-labelledby="section-preview">
       <div class="panel bg-white rounded-2xl shadow-sm border border-slate-200 p-6 w-full max-w-md">
-        <h2 class="text-sm font-bold text-slate-700 mb-4 text-center flex items-center justify-center gap-2">
-          <svg class="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+        <h2 id="section-preview" class="text-sm font-bold text-slate-700 mb-4 text-center flex items-center justify-center gap-2">
+          <svg class="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
           即時預覽
         </h2>
-        <div id="qr-canvas"
+        <div id="qr-canvas" role="img" aria-label="QR Code 預覽區域" aria-live="polite"
              class="w-full aspect-square bg-slate-50 rounded-xl flex items-center justify-center border-2 border-dashed border-slate-200 overflow-hidden">
           <p id="qr-placeholder" class="text-slate-400 text-sm text-center px-4">請在左側輸入資料<br/>QR Code 將即時產生</p>
         </div>
-        <!-- Error message -->
-        <div id="error-container"
+        <!-- [2] a11y: aria-live for errors -->
+        <div id="error-container" role="alert" aria-live="assertive"
              class="hidden mt-3 p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-xs flex items-start gap-2">
-          <svg class="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          <svg class="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
           <span id="error-message"></span>
         </div>
       </div>
 
       <!-- Actions Card -->
-      <div class="panel bg-white rounded-2xl shadow-sm border border-slate-200 p-5 w-full max-w-md space-y-4">
-        <h2 class="text-sm font-bold text-slate-700 flex items-center gap-2">
-          <svg class="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+      <div class="panel bg-white rounded-2xl shadow-sm border border-slate-200 p-5 w-full max-w-md space-y-4" aria-labelledby="section-export">
+        <h2 id="section-export" class="text-sm font-bold text-slate-700 flex items-center gap-2">
+          <svg class="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
           匯出設定
         </h2>
         <div>
           <label class="field-label" for="filename-input">檔案名稱</label>
-          <input id="filename-input" type="text" value="my-qrcode" placeholder="輸入檔案名稱"
+          <input id="filename-input" type="text" value="my-qrcode" placeholder="輸入檔案名稱" aria-label="匯出的檔案名稱"
                  class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-700 focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 outline-none" />
         </div>
-        <button id="download-btn"
+        <button id="download-btn" aria-label="下載 QR Code 圖片"
                 class="w-full py-3 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-semibold text-sm hover:from-indigo-600 hover:to-purple-700 active:scale-95 transition-all shadow-lg shadow-indigo-200 disabled:opacity-40 disabled:cursor-not-allowed disabled:active:scale-100"
                 disabled>
           &#11015; 下載 QR Code
@@ -160,99 +236,91 @@
       </div>
 
       <!-- Privacy & Disclaimer -->
-      <div class="w-full max-w-md bg-emerald-50/60 border border-emerald-200 rounded-xl p-4 text-xs text-emerald-800 space-y-2">
+      <div class="w-full max-w-md bg-emerald-50/60 border border-emerald-200 rounded-xl p-4 text-xs text-emerald-800 space-y-2" role="note">
         <p class="flex items-start gap-2">
-          <svg class="w-4 h-4 mt-0.5 flex-shrink-0 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+          <svg class="w-4 h-4 mt-0.5 flex-shrink-0 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
           <span><strong>隱私保護聲明：</strong>本工具所有資料處理均在您的瀏覽器本機端完成，任何輸入內容（包含 Wi-Fi 密碼、Email 等）皆<strong>不會</strong>上傳至任何伺服器。</span>
         </p>
         <p class="flex items-start gap-2">
-          <svg class="w-4 h-4 mt-0.5 flex-shrink-0 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          <svg class="w-4 h-4 mt-0.5 flex-shrink-0 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
           <span><strong>免責條款：</strong>本工具僅提供 QR Code 產生功能，開發者不對使用者產生之 QR Code 內容及其後續使用方式承擔任何法律責任。</span>
         </p>
       </div>
     </section>
 
     <!-- ═══ RIGHT: Settings Panel ═══ -->
-    <section class="panel bg-white rounded-2xl shadow-sm border border-slate-200 p-5 space-y-6 h-fit lg:sticky lg:top-24 overflow-y-auto lg:max-h-[calc(100vh-7rem)]">
+    <section class="panel bg-white rounded-2xl shadow-sm border border-slate-200 p-5 space-y-6 h-fit lg:sticky lg:top-24 overflow-y-auto lg:max-h-[calc(100vh-7rem)]" aria-labelledby="section-settings">
 
-      <!-- ── General Settings ── -->
       <div class="space-y-4">
-        <h2 class="text-sm font-bold text-slate-700 flex items-center gap-2">
-          <svg class="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+        <h2 id="section-settings" class="text-sm font-bold text-slate-700 flex items-center gap-2">
+          <svg class="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
           一般設定
         </h2>
 
-        <!-- Size -->
         <div>
           <div class="flex justify-between items-center mb-1">
-            <label class="field-label">尺寸</label>
-            <span id="size-value" class="text-xs text-indigo-500 font-mono font-semibold">300 px</span>
+            <label class="field-label" for="size-slider">尺寸</label>
+            <span id="size-value" class="text-xs text-indigo-500 font-mono font-semibold" aria-live="polite">300 px</span>
           </div>
-          <input id="size-slider" type="range" min="150" max="1000" value="300" step="10" class="w-full" />
+          <input id="size-slider" type="range" min="150" max="1000" value="300" step="10" class="w-full" aria-label="QR Code 尺寸（像素）" aria-valuemin="150" aria-valuemax="1000" aria-valuenow="300" />
         </div>
 
-        <!-- Margin -->
         <div>
           <div class="flex justify-between items-center mb-1">
-            <label class="field-label">邊距</label>
-            <span id="margin-value" class="text-xs text-indigo-500 font-mono font-semibold">10 px</span>
+            <label class="field-label" for="margin-slider">邊距</label>
+            <span id="margin-value" class="text-xs text-indigo-500 font-mono font-semibold" aria-live="polite">10 px</span>
           </div>
-          <input id="margin-slider" type="range" min="0" max="50" value="10" step="1" class="w-full" />
+          <input id="margin-slider" type="range" min="0" max="50" value="10" step="1" class="w-full" aria-label="QR Code 邊距（像素）" aria-valuemin="0" aria-valuemax="50" aria-valuenow="10" />
         </div>
 
-        <!-- Colors -->
         <div class="grid grid-cols-2 gap-4">
           <div>
-            <label class="field-label">前景色</label>
+            <label class="field-label" for="fg-color">前景色</label>
             <div class="flex items-center gap-2">
-              <input id="fg-color" type="color" value="#000000" />
+              <input id="fg-color" type="color" value="#000000" aria-label="選擇前景顏色" />
               <span id="fg-hex" class="text-xs font-mono text-slate-500">#000000</span>
             </div>
           </div>
           <div>
-            <label class="field-label">背景色</label>
+            <label class="field-label" for="bg-color">背景色</label>
             <div class="flex items-center gap-2">
-              <input id="bg-color" type="color" value="#FFFFFF" />
+              <input id="bg-color" type="color" value="#FFFFFF" aria-label="選擇背景顏色" />
               <span id="bg-hex" class="text-xs font-mono text-slate-500">#FFFFFF</span>
             </div>
           </div>
         </div>
 
-        <!-- Error Correction -->
         <div>
-          <label class="field-label">容錯等級</label>
-          <div class="grid grid-cols-4 gap-2 mt-1">
-            <button data-ec="L" class="ec-btn py-1.5 rounded-lg text-xs font-semibold border border-slate-300 text-slate-600 hover:border-indigo-400 hover:text-indigo-600 transition-all" title="低 (~7%)">L</button>
-            <button data-ec="M" class="ec-btn py-1.5 rounded-lg text-xs font-semibold border border-slate-300 text-slate-600 hover:border-indigo-400 hover:text-indigo-600 transition-all active-ec" title="中 (~15%)">M</button>
-            <button data-ec="Q" class="ec-btn py-1.5 rounded-lg text-xs font-semibold border border-slate-300 text-slate-600 hover:border-indigo-400 hover:text-indigo-600 transition-all" title="較高 (~25%)">Q</button>
-            <button data-ec="H" class="ec-btn py-1.5 rounded-lg text-xs font-semibold border border-slate-300 text-slate-600 hover:border-indigo-400 hover:text-indigo-600 transition-all" title="最高 (~30%)">H</button>
+          <label class="field-label" id="ec-label">容錯等級</label>
+          <div class="grid grid-cols-4 gap-2 mt-1" role="radiogroup" aria-labelledby="ec-label">
+            <button data-ec="L" class="ec-btn py-1.5 rounded-lg text-xs font-semibold border border-slate-300 text-slate-600 hover:border-indigo-400 hover:text-indigo-600 transition-all" role="radio" aria-checked="false" aria-label="低容錯 約 7%">L</button>
+            <button data-ec="M" class="ec-btn py-1.5 rounded-lg text-xs font-semibold border border-slate-300 text-slate-600 hover:border-indigo-400 hover:text-indigo-600 transition-all active-ec" role="radio" aria-checked="true" aria-label="中容錯 約 15%">M</button>
+            <button data-ec="Q" class="ec-btn py-1.5 rounded-lg text-xs font-semibold border border-slate-300 text-slate-600 hover:border-indigo-400 hover:text-indigo-600 transition-all" role="radio" aria-checked="false" aria-label="較高容錯 約 25%">Q</button>
+            <button data-ec="H" class="ec-btn py-1.5 rounded-lg text-xs font-semibold border border-slate-300 text-slate-600 hover:border-indigo-400 hover:text-indigo-600 transition-all" role="radio" aria-checked="false" aria-label="最高容錯 約 30%">H</button>
           </div>
           <p class="text-[0.65rem] text-slate-400 mt-1">容錯越高，可嵌入越大的 Logo，但資料容量越小</p>
         </div>
 
-        <!-- Export Format -->
         <div>
-          <label class="field-label">匯出格式</label>
-          <div class="grid grid-cols-2 gap-2 mt-1">
-            <button data-fmt="png" class="fmt-btn py-1.5 rounded-lg text-xs font-semibold border border-slate-300 text-slate-600 hover:border-indigo-400 hover:text-indigo-600 transition-all active-fmt">PNG</button>
-            <button data-fmt="svg" class="fmt-btn py-1.5 rounded-lg text-xs font-semibold border border-slate-300 text-slate-600 hover:border-indigo-400 hover:text-indigo-600 transition-all">SVG</button>
+          <label class="field-label" id="fmt-label">匯出格式</label>
+          <div class="grid grid-cols-2 gap-2 mt-1" role="radiogroup" aria-labelledby="fmt-label">
+            <button data-fmt="png" class="fmt-btn py-1.5 rounded-lg text-xs font-semibold border border-slate-300 text-slate-600 hover:border-indigo-400 hover:text-indigo-600 transition-all active-fmt" role="radio" aria-checked="true">PNG</button>
+            <button data-fmt="svg" class="fmt-btn py-1.5 rounded-lg text-xs font-semibold border border-slate-300 text-slate-600 hover:border-indigo-400 hover:text-indigo-600 transition-all" role="radio" aria-checked="false">SVG</button>
           </div>
         </div>
       </div>
 
       <hr class="border-slate-100" />
 
-      <!-- ── Design & Logo ── -->
       <div class="space-y-4">
-        <h2 class="text-sm font-bold text-slate-700 flex items-center gap-2">
-          <svg class="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"/></svg>
+        <h2 id="section-design" class="text-sm font-bold text-slate-700 flex items-center gap-2">
+          <svg class="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"/></svg>
           樣式與 Logo
         </h2>
 
-        <!-- Dot Style -->
         <div>
-          <label class="field-label">點陣樣式</label>
-          <select id="dot-style"
+          <label class="field-label" for="dot-style">點陣樣式</label>
+          <select id="dot-style" aria-label="選擇 QR Code 點陣樣式"
                   class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 outline-none">
             <option value="square">&#9632; 方形</option>
             <option value="dots">&#9679; 圓點</option>
@@ -263,10 +331,9 @@
           </select>
         </div>
 
-        <!-- Corner Square Style (Outer Eye) -->
         <div>
-          <label class="field-label">外框樣式（定位點外框）</label>
-          <select id="corner-square-style"
+          <label class="field-label" for="corner-square-style">外框樣式（定位點外框）</label>
+          <select id="corner-square-style" aria-label="選擇定位點外框樣式"
                   class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 outline-none">
             <option value="">跟隨點陣樣式</option>
             <option value="square">&#9632; 方形</option>
@@ -275,10 +342,9 @@
           </select>
         </div>
 
-        <!-- Corner Dot Style (Inner Eye) -->
         <div>
-          <label class="field-label">內框樣式（定位點內部）</label>
-          <select id="corner-dot-style"
+          <label class="field-label" for="corner-dot-style">內框樣式（定位點內部）</label>
+          <select id="corner-dot-style" aria-label="選擇定位點內部樣式"
                   class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 outline-none">
             <option value="">跟隨點陣樣式</option>
             <option value="square">&#9632; 方形</option>
@@ -286,19 +352,18 @@
           </select>
         </div>
 
-        <!-- Corner Colors -->
         <div class="grid grid-cols-2 gap-4">
           <div>
-            <label class="field-label">外框顏色</label>
+            <label class="field-label" for="corner-square-color">外框顏色</label>
             <div class="flex items-center gap-2">
-              <input id="corner-square-color" type="color" value="#000000" />
+              <input id="corner-square-color" type="color" value="#000000" aria-label="選擇外框顏色" />
               <span id="csq-hex" class="text-xs font-mono text-slate-500">#000000</span>
             </div>
           </div>
           <div>
-            <label class="field-label">內框顏色</label>
+            <label class="field-label" for="corner-dot-color">內框顏色</label>
             <div class="flex items-center gap-2">
-              <input id="corner-dot-color" type="color" value="#000000" />
+              <input id="corner-dot-color" type="color" value="#000000" aria-label="選擇內框顏色" />
               <span id="cdot-hex" class="text-xs font-mono text-slate-500">#000000</span>
             </div>
           </div>
@@ -306,40 +371,50 @@
 
         <hr class="border-slate-100" />
 
-        <!-- Logo Upload -->
         <div>
-          <label class="field-label">嵌入 Logo</label>
-          <div id="logo-drop-zone"
+          <label class="field-label" id="logo-label">嵌入 Logo</label>
+          <div id="logo-drop-zone" role="button" tabindex="0" aria-labelledby="logo-label" aria-describedby="logo-hint"
                class="mt-1 border-2 border-dashed border-slate-300 rounded-xl p-4 text-center cursor-pointer hover:border-indigo-400 hover:bg-indigo-50/30 transition-all">
-            <input id="logo-input" type="file" accept="image/png,image/jpeg,image/gif,image/svg+xml,image/webp" class="hidden" />
+            <input id="logo-input" type="file" accept="image/png,image/jpeg,image/gif,image/svg+xml,image/webp" class="hidden" aria-label="上傳 Logo 圖片" />
             <div id="logo-preview-area">
-              <svg class="mx-auto w-8 h-8 text-slate-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+              <svg class="mx-auto w-8 h-8 text-slate-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
               <p class="text-xs text-slate-500">點擊或拖放圖片上傳</p>
-              <p class="text-[0.6rem] text-slate-400 mt-1">支援 PNG / JPG / SVG / WebP（上限 2 MB）</p>
+              <p id="logo-hint" class="text-[0.6rem] text-slate-400 mt-1">支援 PNG / JPG / SVG / WebP（上限 2 MB）</p>
             </div>
           </div>
-          <button id="remove-logo-btn"
+          <button id="remove-logo-btn" aria-label="移除已上傳的 Logo"
                   class="hidden mt-2 text-xs text-red-500 hover:text-red-700 transition-colors">
             &#10005; 移除 Logo
           </button>
         </div>
 
-        <!-- Logo Size -->
         <div id="logo-size-container" class="hidden">
           <div class="flex justify-between items-center mb-1">
-            <label class="field-label">Logo 大小比例</label>
-            <span id="logo-size-value" class="text-xs text-indigo-500 font-mono font-semibold">0.4</span>
+            <label class="field-label" for="logo-size-slider">Logo 大小比例</label>
+            <span id="logo-size-value" class="text-xs text-indigo-500 font-mono font-semibold" aria-live="polite">0.4</span>
           </div>
-          <input id="logo-size-slider" type="range" min="0.1" max="0.5" value="0.4" step="0.05" class="w-full" />
+          <input id="logo-size-slider" type="range" min="0.1" max="0.5" value="0.4" step="0.05" class="w-full" aria-label="Logo 大小比例" aria-valuemin="0.1" aria-valuemax="0.5" aria-valuenow="0.4" />
         </div>
       </div>
     </section>
   </main>
 
+  <!-- ═══ [3] PWA Install Banner ═══ -->
+  <div id="pwa-install-banner" role="complementary" aria-label="安裝應用程式">
+    <button id="pwa-install-btn" aria-label="安裝此應用程式到桌面"
+            class="flex items-center gap-2 px-4 py-3 bg-indigo-600 text-white text-sm font-semibold rounded-xl shadow-lg hover:bg-indigo-700 transition-all">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+      安裝到桌面
+    </button>
+  </div>
+
   <!-- ════════ Footer ════════ -->
-  <footer class="text-center py-4 text-xs text-slate-400">
-    純前端離線工具 · 所有資料僅在您的瀏覽器中處理 · 開源於
-    <a href="https://github.com/" class="text-indigo-400 hover:underline" target="_blank" rel="noopener noreferrer">GitHub</a>
+  <footer class="text-center py-4 text-xs text-slate-400" role="contentinfo">
+    <p>v1.0.0 · 純前端離線工具 · 所有資料僅在您的瀏覽器中處理</p>
+    <p class="mt-1">
+      開源於 <a href="https://github.com/" class="text-indigo-400 hover:underline" target="_blank" rel="noopener noreferrer">GitHub</a>
+      · <a href="CHANGELOG.html" class="text-indigo-400 hover:underline">更新日誌</a>
+    </p>
   </footer>
 
   <!-- ════════ JavaScript ════════ -->
@@ -348,77 +423,123 @@
   document.addEventListener("DOMContentLoaded", function () {
 
     // ═══════════════════════════════════════════
+    //  [7] Analytics: Privacy-friendly stub
+    //  Replace with Umami / Plausible script tag
+    //  when ready. This module sends ZERO data
+    //  until you configure an endpoint.
+    // ═══════════════════════════════════════════
+    var Analytics = (function () {
+      var CONFIG = {
+        enabled: false,
+        // Set to your Umami / Plausible URL to activate
+        // endpoint: "https://analytics.example.com/api/event",
+        // siteId: "YOUR_SITE_ID"
+      };
+
+      function track(eventName, props) {
+        if (!CONFIG.enabled || !CONFIG.endpoint) return;
+        try {
+          navigator.sendBeacon(CONFIG.endpoint, JSON.stringify({
+            type: "event",
+            payload: {
+              website: CONFIG.siteId,
+              name: eventName,
+              data: props || {}
+            }
+          }));
+        } catch (e) { /* silently fail */ }
+      }
+
+      function trackPageView() {
+        track("pageview", { url: location.pathname, referrer: document.referrer });
+      }
+
+      return { track: track, trackPageView: trackPageView };
+    })();
+
+    Analytics.trackPageView();
+
+    // ═══════════════════════════════════════════
+    //  [3] PWA: Service Worker registration
+    // ═══════════════════════════════════════════
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("sw.js").catch(function () {});
+    }
+
+    // PWA Install Prompt
+    var deferredInstallPrompt = null;
+    var pwaInstallBanner = document.getElementById("pwa-install-banner");
+    var pwaInstallBtn    = document.getElementById("pwa-install-btn");
+
+    window.addEventListener("beforeinstallprompt", function (e) {
+      e.preventDefault();
+      deferredInstallPrompt = e;
+      pwaInstallBanner.classList.add("show");
+    });
+
+    pwaInstallBtn.addEventListener("click", function () {
+      if (!deferredInstallPrompt) return;
+      deferredInstallPrompt.prompt();
+      deferredInstallPrompt.userChoice.then(function () {
+        deferredInstallPrompt = null;
+        pwaInstallBanner.classList.remove("show");
+      });
+      Analytics.track("pwa_install_click");
+    });
+
+    window.addEventListener("appinstalled", function () {
+      pwaInstallBanner.classList.remove("show");
+      Analytics.track("pwa_installed");
+    });
+
+    // ═══════════════════════════════════════════
     //  Security: Input sanitization utilities
     // ═══════════════════════════════════════════
-    const SecurityUtils = {
-      /** Sanitize user text — strip potential HTML/script tags */
+    var SecurityUtils = {
       sanitizeText: function (str) {
         if (typeof str !== "string") return "";
         return str.replace(/[<>"'&]/g, function (ch) {
           return {"<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#x27;","&":"&amp;"}[ch];
         });
       },
-
-      /** Sanitize filename — allow only safe characters */
       sanitizeFilename: function (name) {
         return name.replace(/[^a-zA-Z0-9_\-一-鿿]/g, "_").substring(0, 100) || "my-qrcode";
       },
-
-      /** Validate file as an image: check magic bytes */
       validateImageFile: function (file) {
         return new Promise(function (resolve, reject) {
-          // 1. Check size (max 2 MB)
           var MAX_SIZE = 2 * 1024 * 1024;
           if (file.size > MAX_SIZE) {
             reject(new Error("檔案大小超過 2 MB 上限（目前 " + (file.size / 1024 / 1024).toFixed(1) + " MB）"));
             return;
           }
-
-          // 2. Check MIME type
           var ALLOWED_MIMES = ["image/png","image/jpeg","image/gif","image/svg+xml","image/webp"];
           if (!ALLOWED_MIMES.includes(file.type)) {
             reject(new Error("不支援的檔案格式：" + file.type + "。請使用 PNG、JPG、GIF、SVG 或 WebP。"));
             return;
           }
-
-          // 3. Verify magic bytes (header signature)
           var reader = new FileReader();
           reader.onload = function (e) {
             var bytes = new Uint8Array(e.target.result);
             var valid = false;
-
-            // PNG: 137 80 78 71
-            if (bytes[0] === 0x89 && bytes[1] === 0x50 && bytes[2] === 0x4E && bytes[3] === 0x47) valid = true;
-            // JPEG: 255 216 255
-            else if (bytes[0] === 0xFF && bytes[1] === 0xD8 && bytes[2] === 0xFF) valid = true;
-            // GIF: 47 49 46 38
-            else if (bytes[0] === 0x47 && bytes[1] === 0x49 && bytes[2] === 0x46 && bytes[3] === 0x38) valid = true;
-            // WebP: RIFF....WEBP
-            else if (bytes[0] === 0x52 && bytes[1] === 0x49 && bytes[2] === 0x46 && bytes[3] === 0x46 &&
-                     bytes[8] === 0x57 && bytes[9] === 0x45 && bytes[10] === 0x42 && bytes[11] === 0x50) valid = true;
-            // SVG: starts with < (text-based — allow if MIME matches)
-            else if (file.type === "image/svg+xml" && (bytes[0] === 0x3C || bytes[0] === 0xEF)) valid = true;
-
-            if (!valid) {
-              reject(new Error("檔案內容與宣稱的格式不符，可能已損壞或遭竄改。"));
-              return;
-            }
-
-            // 4. For SVG, additionally check for script tags
+            if (bytes[0]===0x89 && bytes[1]===0x50 && bytes[2]===0x4E && bytes[3]===0x47) valid = true;
+            else if (bytes[0]===0xFF && bytes[1]===0xD8 && bytes[2]===0xFF) valid = true;
+            else if (bytes[0]===0x47 && bytes[1]===0x49 && bytes[2]===0x46 && bytes[3]===0x38) valid = true;
+            else if (bytes[0]===0x52 && bytes[1]===0x49 && bytes[2]===0x46 && bytes[3]===0x46 &&
+                     bytes[8]===0x57 && bytes[9]===0x45 && bytes[10]===0x42 && bytes[11]===0x50) valid = true;
+            else if (file.type==="image/svg+xml" && (bytes[0]===0x3C || bytes[0]===0xEF)) valid = true;
+            if (!valid) { reject(new Error("檔案內容與宣稱的格式不符，可能已損壞或遭竄改。")); return; }
             if (file.type === "image/svg+xml") {
               var textReader = new FileReader();
               textReader.onload = function (te) {
                 var svgText = te.target.result;
                 if (/<script/i.test(svgText) || /on\w+\s*=/i.test(svgText) || /javascript:/i.test(svgText)) {
-                  reject(new Error("SVG 檔案含有潛在的惡意腳本，已被攔截。"));
-                  return;
+                  reject(new Error("SVG 檔案含有潛在的惡意腳本，已被攔截。")); return;
                 }
                 resolve(file);
               };
               textReader.readAsText(file);
               return;
             }
-
             resolve(file);
           };
           reader.readAsArrayBuffer(file.slice(0, 16));
@@ -478,7 +599,7 @@
     };
 
     // ═══════════════════════════════════════════
-    //  Input Templates (using createElement for XSS safety)
+    //  Input Templates (createElement for XSS safety)
     // ═══════════════════════════════════════════
     function createInput(type, id, placeholder, extra) {
       var el;
@@ -492,8 +613,7 @@
         if (extra && extra.options) {
           extra.options.forEach(function (opt) {
             var o = document.createElement("option");
-            o.value = opt.value;
-            o.textContent = opt.label;
+            o.value = opt.value; o.textContent = opt.label;
             el.appendChild(o);
           });
         }
@@ -520,61 +640,51 @@
 
     var INPUT_BUILDERS = {
       url: function () {
-        var container = document.createElement("div");
-        container.className = "fade-in";
-        container.appendChild(createFieldBlock("網址", createInput("url", "input-url", "例：https://example.com")));
-        return container;
+        var c = document.createElement("div"); c.className = "fade-in";
+        c.appendChild(createFieldBlock("網址", createInput("url", "input-url", "例：https://example.com")));
+        return c;
       },
       text: function () {
-        var container = document.createElement("div");
-        container.className = "fade-in";
+        var c = document.createElement("div"); c.className = "fade-in";
         var ta = createInput("textarea", "input-text", "輸入任意文字…", { rows: 4 });
-        container.appendChild(createFieldBlock("文字內容", ta));
+        c.appendChild(createFieldBlock("文字內容", ta));
         var counter = document.createElement("p");
         counter.id = "char-count";
         counter.className = "text-right text-[0.65rem] text-slate-400 mt-1";
         counter.textContent = "0 / 4296 字元";
-        container.appendChild(counter);
-        return container;
+        counter.setAttribute("aria-live", "polite");
+        c.appendChild(counter);
+        return c;
       },
       wifi: function () {
-        var container = document.createElement("div");
-        container.className = "space-y-3 fade-in";
-
-        container.appendChild(createFieldBlock("網路名稱 (SSID)", createInput("text", "input-ssid", "輸入 Wi-Fi 名稱")));
-
-        // Password with toggle
+        var c = document.createElement("div"); c.className = "space-y-3 fade-in";
+        c.appendChild(createFieldBlock("網路名稱 (SSID)", createInput("text", "input-ssid", "輸入 Wi-Fi 名稱")));
         var passBlock = document.createElement("div");
         var passLabel = document.createElement("label");
-        passLabel.className = "field-label";
-        passLabel.textContent = "密碼";
+        passLabel.className = "field-label"; passLabel.textContent = "密碼";
         passLabel.setAttribute("for", "input-password");
         passBlock.appendChild(passLabel);
-        var passWrap = document.createElement("div");
-        passWrap.className = "relative";
+        var passWrap = document.createElement("div"); passWrap.className = "relative";
         var passInput = createInput("password", "input-password", "輸入密碼");
         passInput.className += " pr-10";
+        passInput.setAttribute("autocomplete", "off");
         passWrap.appendChild(passInput);
         var toggleBtn = document.createElement("button");
-        toggleBtn.type = "button";
-        toggleBtn.id = "toggle-password";
+        toggleBtn.type = "button"; toggleBtn.id = "toggle-password";
         toggleBtn.className = "absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors";
-        toggleBtn.title = "顯示/隱藏密碼";
+        toggleBtn.setAttribute("aria-label", "顯示或隱藏密碼");
         toggleBtn.innerHTML = '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>';
         passWrap.appendChild(toggleBtn);
         passBlock.appendChild(passWrap);
-        container.appendChild(passBlock);
-
-        container.appendChild(createFieldBlock("加密方式", createInput("select", "input-encryption", "", {
+        c.appendChild(passBlock);
+        c.appendChild(createFieldBlock("加密方式", createInput("select", "input-encryption", "", {
           options: [
             { value: "WPA", label: "WPA / WPA2 / WPA3" },
             { value: "WEP", label: "WEP" },
             { value: "nopass", label: "無密碼（開放）" }
           ]
         })));
-
-        var checkBlock = document.createElement("div");
-        checkBlock.className = "flex items-center gap-2";
+        var checkBlock = document.createElement("div"); checkBlock.className = "flex items-center gap-2";
         var cb = document.createElement("input");
         cb.type = "checkbox"; cb.id = "input-hidden";
         cb.className = "rounded border-slate-300 text-indigo-500 focus:ring-indigo-400 w-4 h-4";
@@ -584,60 +694,48 @@
         cbLabel.className = "text-sm text-slate-600";
         cbLabel.textContent = "隱藏網路 (SSID 不廣播)";
         checkBlock.appendChild(cbLabel);
-        container.appendChild(checkBlock);
-
-        return container;
+        c.appendChild(checkBlock);
+        return c;
       },
       email: function () {
-        var container = document.createElement("div");
-        container.className = "space-y-3 fade-in";
-        container.appendChild(createFieldBlock("收件人", createInput("email", "input-email-to", "例：user@example.com")));
-        container.appendChild(createFieldBlock("主旨", createInput("text", "input-email-subject", "輸入郵件主旨")));
-        container.appendChild(createFieldBlock("內文", createInput("textarea", "input-email-body", "輸入郵件內文…", { rows: 3 })));
-        return container;
+        var c = document.createElement("div"); c.className = "space-y-3 fade-in";
+        c.appendChild(createFieldBlock("收件人", createInput("email", "input-email-to", "例：user@example.com")));
+        c.appendChild(createFieldBlock("主旨", createInput("text", "input-email-subject", "輸入郵件主旨")));
+        c.appendChild(createFieldBlock("內文", createInput("textarea", "input-email-body", "輸入郵件內文…", { rows: 3 })));
+        return c;
       }
     };
 
     // ═══════════════════════════════════════════
-    //  Data Builder (raw string for QR — no HTML)
+    //  Data Builder
     // ═══════════════════════════════════════════
     function buildDataString() {
       switch (state.dataType) {
-        case "url":
-          return ($("#input-url") || {}).value || "";
-        case "text":
-          return ($("#input-text") || {}).value || "";
+        case "url":  return ($("#input-url") || {}).value || "";
+        case "text": return ($("#input-text") || {}).value || "";
         case "wifi":
-          var ssid   = ($("#input-ssid") || {}).value || "";
-          var pass   = ($("#input-password") || {}).value || "";
-          var enc    = ($("#input-encryption") || {}).value || "WPA";
+          var ssid = ($("#input-ssid") || {}).value || "";
+          var pass = ($("#input-password") || {}).value || "";
+          var enc  = ($("#input-encryption") || {}).value || "WPA";
           var hidden = ($("#input-hidden") || {}).checked ? "true" : "false";
           if (!ssid) return "";
-          // Escape special Wi-Fi chars: \ ; , " :
           function escWifi(s) { return s.replace(/([\\;,":])/, "\\$1"); }
           return "WIFI:T:" + enc + ";S:" + escWifi(ssid) + ";P:" + escWifi(pass) + ";H:" + hidden + ";;";
         case "email":
-          var to      = ($("#input-email-to") || {}).value || "";
+          var to = ($("#input-email-to") || {}).value || "";
           var subject = ($("#input-email-subject") || {}).value || "";
-          var body    = ($("#input-email-body") || {}).value || "";
+          var body = ($("#input-email-body") || {}).value || "";
           if (!to) return "";
           var params = [];
           if (subject) params.push("subject=" + encodeURIComponent(subject));
-          if (body)    params.push("body=" + encodeURIComponent(body));
+          if (body) params.push("body=" + encodeURIComponent(body));
           return "mailto:" + to + (params.length ? "?" + params.join("&") : "");
-        default:
-          return "";
+        default: return "";
       }
     }
 
-    // ═══════════════════════════════════════════
-    //  QR Capacity Limits (byte limits per EC)
-    // ═══════════════════════════════════════════
     var QR_CAPACITY = { L: 2953, M: 2331, Q: 1663, H: 1273 };
 
-    // ═══════════════════════════════════════════
-    //  Debounce
-    // ═══════════════════════════════════════════
     function debounce(fn, ms) {
       var timer;
       return function () {
@@ -647,78 +745,53 @@
       };
     }
 
-    // ═══════════════════════════════════════════
-    //  Error display
-    // ═══════════════════════════════════════════
     function showError(msg) {
       DOM.errorContainer.classList.remove("hidden");
-      DOM.errorMessage.textContent = msg;    // textContent prevents XSS
+      DOM.errorMessage.textContent = msg;
     }
     function hideError() {
       DOM.errorContainer.classList.add("hidden");
       DOM.errorMessage.textContent = "";
     }
 
-    // ═══════════════════════════════════════════
-    //  Render QR Code
-    // ═══════════════════════════════════════════
     function renderQR() {
       var data = buildDataString();
       hideError();
-
       if (!data) {
         state.hasData = false;
         DOM.downloadBtn.disabled = true;
-        DOM.qrCanvas.textContent = "";               // safe clear
+        DOM.qrCanvas.textContent = "";
         DOM.qrCanvas.appendChild(DOM.placeholder);
         DOM.placeholder.classList.remove("hidden");
         return;
       }
-
-      // Check capacity
       var byteLength = new TextEncoder().encode(data).length;
       if (byteLength > QR_CAPACITY[state.errorCorrection]) {
         showError("資料量（" + byteLength + " bytes）超過目前容錯等級「" + state.errorCorrection + "」的上限（" + QR_CAPACITY[state.errorCorrection] + " bytes）。請縮減內容或降低容錯等級。");
         return;
       }
-
       state.hasData = true;
       DOM.downloadBtn.disabled = false;
       DOM.placeholder.classList.add("hidden");
-
-      var size   = parseInt(DOM.sizeSlider.value, 10);
+      var size = parseInt(DOM.sizeSlider.value, 10);
       var margin = parseInt(DOM.marginSlider.value, 10);
-
       var options = {
-        width:  size,
-        height: size,
-        data:   data,
-        margin: margin,
-        type:   "canvas",
-        dotsOptions:           { color: DOM.fgColor.value,           type: DOM.dotStyle.value },
-        backgroundOptions:     { color: DOM.bgColor.value },
-        cornersSquareOptions:  { color: DOM.cornerSquareColor.value },
-        cornersDotOptions:     { color: DOM.cornerDotColor.value },
-        qrOptions:             { errorCorrectionLevel: state.errorCorrection }
+        width: size, height: size, data: data, margin: margin, type: "canvas",
+        dotsOptions:          { color: DOM.fgColor.value, type: DOM.dotStyle.value },
+        backgroundOptions:    { color: DOM.bgColor.value },
+        cornersSquareOptions: { color: DOM.cornerSquareColor.value },
+        cornersDotOptions:    { color: DOM.cornerDotColor.value },
+        qrOptions:            { errorCorrectionLevel: state.errorCorrection }
       };
-
       var csType = DOM.cornerSquareStyle.value;
       if (csType) options.cornersSquareOptions.type = csType;
       var cdType = DOM.cornerDotStyle.value;
       if (cdType) options.cornersDotOptions.type = cdType;
-
       if (state.logoImage) {
         options.image = state.logoImage;
-        options.imageOptions = {
-          crossOrigin: "anonymous",
-          margin: 4,
-          imageSize: parseFloat(DOM.logoSizeSlider.value)
-        };
+        options.imageOptions = { crossOrigin: "anonymous", margin: 4, imageSize: parseFloat(DOM.logoSizeSlider.value) };
       }
-
-      // Clear previous (safe)
       while (DOM.qrCanvas.firstChild) DOM.qrCanvas.removeChild(DOM.qrCanvas.firstChild);
-
       try {
         state.qrInstance = new QRCodeStyling(options);
         state.qrInstance.append(DOM.qrCanvas);
@@ -731,28 +804,21 @@
 
     var debouncedRender = debounce(renderQR, 300);
 
-    // ═══════════════════════════════════════════
-    //  Render Dynamic Inputs (createElement, no innerHTML)
-    // ═══════════════════════════════════════════
     function renderInputs() {
       state.dataType = DOM.dataType.value;
-      // Clear safely
       while (DOM.dynamicInputs.firstChild) DOM.dynamicInputs.removeChild(DOM.dynamicInputs.firstChild);
       DOM.dynamicInputs.appendChild(INPUT_BUILDERS[state.dataType]());
       bindInputListeners();
       debouncedRender();
+      Analytics.track("data_type_change", { type: state.dataType });
     }
 
     function bindInputListeners() {
-      var inputs = DOM.dynamicInputs.querySelectorAll("input, textarea, select");
-      inputs.forEach(function (el) {
+      DOM.dynamicInputs.querySelectorAll("input, textarea, select").forEach(function (el) {
         el.addEventListener("input", debouncedRender);
         el.addEventListener("change", debouncedRender);
       });
-
-      // Character count for text
-      var textInput = $("#input-text");
-      var charCount = $("#char-count");
+      var textInput = $("#input-text"), charCount = $("#char-count");
       if (textInput && charCount) {
         textInput.addEventListener("input", function () {
           var len = textInput.value.length;
@@ -760,13 +826,11 @@
           charCount.classList.toggle("text-red-500", len > 4296);
         });
       }
-
-      // Password toggle
-      var toggleBtn = $("#toggle-password");
-      var passInput = $("#input-password");
+      var toggleBtn = $("#toggle-password"), passInput = $("#input-password");
       if (toggleBtn && passInput) {
         toggleBtn.addEventListener("click", function () {
           passInput.type = passInput.type === "password" ? "text" : "password";
+          toggleBtn.setAttribute("aria-label", passInput.type === "password" ? "顯示密碼" : "隱藏密碼");
         });
       }
     }
@@ -776,70 +840,86 @@
     // ═══════════════════════════════════════════
     DOM.sizeSlider.addEventListener("input", function () {
       DOM.sizeValue.textContent = DOM.sizeSlider.value + " px";
+      DOM.sizeSlider.setAttribute("aria-valuenow", DOM.sizeSlider.value);
       debouncedRender();
     });
     DOM.marginSlider.addEventListener("input", function () {
       DOM.marginValue.textContent = DOM.marginSlider.value + " px";
+      DOM.marginSlider.setAttribute("aria-valuenow", DOM.marginSlider.value);
       debouncedRender();
     });
-    DOM.fgColor.addEventListener("input", function () {
-      DOM.fgHex.textContent = DOM.fgColor.value.toUpperCase();
-      debouncedRender();
-    });
-    DOM.bgColor.addEventListener("input", function () {
-      DOM.bgHex.textContent = DOM.bgColor.value.toUpperCase();
-      debouncedRender();
-    });
-    DOM.cornerSquareColor.addEventListener("input", function () {
-      DOM.csqHex.textContent = DOM.cornerSquareColor.value.toUpperCase();
-      debouncedRender();
-    });
-    DOM.cornerDotColor.addEventListener("input", function () {
-      DOM.cdotHex.textContent = DOM.cornerDotColor.value.toUpperCase();
-      debouncedRender();
-    });
-
+    DOM.fgColor.addEventListener("input", function () { DOM.fgHex.textContent = DOM.fgColor.value.toUpperCase(); debouncedRender(); });
+    DOM.bgColor.addEventListener("input", function () { DOM.bgHex.textContent = DOM.bgColor.value.toUpperCase(); debouncedRender(); });
+    DOM.cornerSquareColor.addEventListener("input", function () { DOM.csqHex.textContent = DOM.cornerSquareColor.value.toUpperCase(); debouncedRender(); });
+    DOM.cornerDotColor.addEventListener("input", function () { DOM.cdotHex.textContent = DOM.cornerDotColor.value.toUpperCase(); debouncedRender(); });
     DOM.dotStyle.addEventListener("change", debouncedRender);
     DOM.cornerSquareStyle.addEventListener("change", debouncedRender);
     DOM.cornerDotStyle.addEventListener("change", debouncedRender);
 
+    // [2] a11y: Arrow-key navigation for radio button groups
+    function setupRadioGroupKeyboard(selector) {
+      var btns = Array.from($$(selector));
+      btns.forEach(function (btn, i) {
+        btn.addEventListener("keydown", function (e) {
+          var next;
+          if (e.key === "ArrowRight" || e.key === "ArrowDown") {
+            next = btns[(i + 1) % btns.length];
+          } else if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
+            next = btns[(i - 1 + btns.length) % btns.length];
+          }
+          if (next) { e.preventDefault(); next.click(); next.focus(); }
+        });
+      });
+    }
+
     // Error Correction buttons
     $$(".ec-btn").forEach(function (btn) {
       btn.addEventListener("click", function () {
-        $$(".ec-btn").forEach(function (b) { b.classList.remove("active-ec"); });
+        $$(".ec-btn").forEach(function (b) { b.classList.remove("active-ec"); b.setAttribute("aria-checked", "false"); b.setAttribute("tabindex", "-1"); });
         btn.classList.add("active-ec");
+        btn.setAttribute("aria-checked", "true");
+        btn.setAttribute("tabindex", "0");
         state.errorCorrection = btn.dataset.ec;
         debouncedRender();
       });
     });
+    setupRadioGroupKeyboard(".ec-btn");
 
     // Format buttons
     $$(".fmt-btn").forEach(function (btn) {
       btn.addEventListener("click", function () {
-        $$(".fmt-btn").forEach(function (b) { b.classList.remove("active-fmt"); });
+        $$(".fmt-btn").forEach(function (b) { b.classList.remove("active-fmt"); b.setAttribute("aria-checked", "false"); b.setAttribute("tabindex", "-1"); });
         btn.classList.add("active-fmt");
+        btn.setAttribute("aria-checked", "true");
+        btn.setAttribute("tabindex", "0");
         state.exportFormat = btn.dataset.fmt;
       });
     });
+    setupRadioGroupKeyboard(".fmt-btn");
+
+    // Set initial tabindex for radio groups
+    $$(".ec-btn:not(.active-ec)").forEach(function (b) { b.setAttribute("tabindex", "-1"); });
+    $$(".fmt-btn:not(.active-fmt)").forEach(function (b) { b.setAttribute("tabindex", "-1"); });
 
     // ═══════════════════════════════════════════
-    //  Logo Upload (with security validation)
+    //  Logo Upload
     // ═══════════════════════════════════════════
     DOM.logoDropZone.addEventListener("click", function () { DOM.logoInput.click(); });
+    // [2] a11y: keyboard activation for drop zone
+    DOM.logoDropZone.addEventListener("keydown", function (e) {
+      if (e.key === "Enter" || e.key === " ") { e.preventDefault(); DOM.logoInput.click(); }
+    });
     DOM.logoDropZone.addEventListener("dragover", function (e) {
-      e.preventDefault();
-      DOM.logoDropZone.classList.add("border-indigo-400", "bg-indigo-50/50");
+      e.preventDefault(); DOM.logoDropZone.classList.add("border-indigo-400", "bg-indigo-50/50");
     });
     DOM.logoDropZone.addEventListener("dragleave", function () {
       DOM.logoDropZone.classList.remove("border-indigo-400", "bg-indigo-50/50");
     });
     DOM.logoDropZone.addEventListener("drop", function (e) {
-      e.preventDefault();
-      DOM.logoDropZone.classList.remove("border-indigo-400", "bg-indigo-50/50");
+      e.preventDefault(); DOM.logoDropZone.classList.remove("border-indigo-400", "bg-indigo-50/50");
       var file = e.dataTransfer.files[0];
       if (file) processLogoFile(file);
     });
-
     DOM.logoInput.addEventListener("change", function () {
       var file = DOM.logoInput.files[0];
       if (file) processLogoFile(file);
@@ -851,16 +931,14 @@
           var reader = new FileReader();
           reader.onload = function (e) {
             state.logoImage = e.target.result;
-            // Build preview with createElement (XSS-safe)
             while (DOM.logoPreviewArea.firstChild) DOM.logoPreviewArea.removeChild(DOM.logoPreviewArea.firstChild);
             var img = document.createElement("img");
-            img.src = e.target.result;
-            img.alt = "Logo 預覽";
+            img.src = e.target.result; img.alt = "Logo 預覽";
             img.className = "w-16 h-16 object-contain mx-auto rounded-lg";
             DOM.logoPreviewArea.appendChild(img);
             var nameP = document.createElement("p");
             nameP.className = "text-xs text-slate-500 mt-2";
-            nameP.textContent = validFile.name;   // textContent, not innerHTML
+            nameP.textContent = validFile.name;
             DOM.logoPreviewArea.appendChild(nameP);
             DOM.removeLogoBtn.classList.remove("hidden");
             DOM.logoSizeContainer.classList.remove("hidden");
@@ -868,62 +946,40 @@
           };
           reader.readAsDataURL(validFile);
         })
-        .catch(function (err) {
-          showError(err.message);
-          DOM.logoInput.value = "";
-        });
+        .catch(function (err) { showError(err.message); DOM.logoInput.value = ""; });
     }
 
     DOM.removeLogoBtn.addEventListener("click", function () {
-      state.logoImage = null;
-      DOM.logoInput.value = "";
-      // Rebuild placeholder with createElement
+      state.logoImage = null; DOM.logoInput.value = "";
       while (DOM.logoPreviewArea.firstChild) DOM.logoPreviewArea.removeChild(DOM.logoPreviewArea.firstChild);
-      var svgNS = "http://www.w3.org/2000/svg";
       var svgWrap = document.createElement("div");
       svgWrap.innerHTML = '<svg class="mx-auto w-8 h-8 text-slate-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>';
       DOM.logoPreviewArea.appendChild(svgWrap.firstChild);
-      var p1 = document.createElement("p");
-      p1.className = "text-xs text-slate-500";
-      p1.textContent = "點擊或拖放圖片上傳";
-      DOM.logoPreviewArea.appendChild(p1);
-      var p2 = document.createElement("p");
-      p2.className = "text-[0.6rem] text-slate-400 mt-1";
-      p2.textContent = "支援 PNG / JPG / SVG / WebP（上限 2 MB）";
-      DOM.logoPreviewArea.appendChild(p2);
-      DOM.removeLogoBtn.classList.add("hidden");
-      DOM.logoSizeContainer.classList.add("hidden");
+      var p1 = document.createElement("p"); p1.className = "text-xs text-slate-500"; p1.textContent = "點擊或拖放圖片上傳";
+      var p2 = document.createElement("p"); p2.className = "text-[0.6rem] text-slate-400 mt-1"; p2.textContent = "支援 PNG / JPG / SVG / WebP（上限 2 MB）";
+      DOM.logoPreviewArea.appendChild(p1); DOM.logoPreviewArea.appendChild(p2);
+      DOM.removeLogoBtn.classList.add("hidden"); DOM.logoSizeContainer.classList.add("hidden");
       debouncedRender();
     });
 
     DOM.logoSizeSlider.addEventListener("input", function () {
       DOM.logoSizeValue.textContent = DOM.logoSizeSlider.value;
+      DOM.logoSizeSlider.setAttribute("aria-valuenow", DOM.logoSizeSlider.value);
       debouncedRender();
     });
 
     // ═══════════════════════════════════════════
-    //  Download (sanitized filename)
+    //  Download
     // ═══════════════════════════════════════════
     DOM.downloadBtn.addEventListener("click", function () {
       if (!state.qrInstance || !state.hasData) return;
-      var rawName = DOM.filenameInput.value.trim();
-      var safeName = SecurityUtils.sanitizeFilename(rawName);
-      state.qrInstance.download({
-        name: safeName,
-        extension: state.exportFormat
-      });
+      var safeName = SecurityUtils.sanitizeFilename(DOM.filenameInput.value.trim());
+      state.qrInstance.download({ name: safeName, extension: state.exportFormat });
+      Analytics.track("qr_download", { format: state.exportFormat, dataType: state.dataType });
     });
 
-    // ═══════════════════════════════════════════
-    //  Data Type Change
-    // ═══════════════════════════════════════════
     DOM.dataType.addEventListener("change", renderInputs);
-
-    // ═══════════════════════════════════════════
-    //  Initialize
-    // ═══════════════════════════════════════════
     renderInputs();
-
   });
   </script>
 </body>

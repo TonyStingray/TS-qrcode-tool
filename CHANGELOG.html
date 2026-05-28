@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>更新日誌 — 自訂 QR Code 產生器</title>
+  <link rel="stylesheet" href="assets/css/style.css" />
+  <style>
+    body { max-width: 720px; margin: 0 auto; padding: 2rem 1rem; }
+    .tag { display: inline-block; font-size: 0.7rem; padding: 2px 8px; border-radius: 9999px; font-weight: 600; }
+    .tag-feat { background: #dbeafe; color: #1e40af; }
+    .tag-fix  { background: #fef3c7; color: #92400e; }
+    .tag-sec  { background: #fce7f3; color: #9d174d; }
+    .tag-perf { background: #d1fae5; color: #065f46; }
+  </style>
+</head>
+<body class="bg-gradient-to-br from-slate-50 to-indigo-50 text-slate-700">
+  <a href="./" class="text-indigo-500 text-sm hover:underline">&larr; 回到 QR Code 產生器</a>
+
+  <h1 class="text-2xl font-bold text-slate-800 mt-4 mb-6">更新日誌 (Changelog)</h1>
+
+  <article class="mb-8">
+    <h2 class="text-lg font-bold text-slate-800 mb-1">v1.0.0 <span class="text-sm font-normal text-slate-400">— 2026-05-28</span></h2>
+    <p class="text-sm text-slate-500 mb-3">首次公開發佈</p>
+
+    <h3 class="text-sm font-semibold text-slate-700 mt-3 mb-2"><span class="tag tag-feat">功能</span></h3>
+    <ul class="text-sm space-y-1 ml-4 list-disc list-outside text-slate-600">
+      <li>支援 4 種資料類型：網址 (URL)、純文字、Wi-Fi、電子郵件</li>
+      <li>即時預覽，300ms debounce 最佳化</li>
+      <li>6 種點陣樣式 + 3 種外框樣式 + 2 種內框樣式</li>
+      <li>自訂前景色、背景色、外框色、內框色</li>
+      <li>可嵌入自訂 Logo（支援 PNG/JPG/GIF/SVG/WebP）</li>
+      <li>匯出 PNG 或 SVG 格式，支援自訂檔名</li>
+      <li>容錯等級選擇：L / M / Q / H</li>
+      <li>3 欄桌面版 / 單欄手機版響應式佈局</li>
+    </ul>
+
+    <h3 class="text-sm font-semibold text-slate-700 mt-3 mb-2"><span class="tag tag-sec">安全</span></h3>
+    <ul class="text-sm space-y-1 ml-4 list-disc list-outside text-slate-600">
+      <li>Content Security Policy (CSP) 嚴格設定</li>
+      <li>零外部 CDN 依賴，所有資源本地託管</li>
+      <li>XSS 防護：使用 createElement + textContent</li>
+      <li>Logo 上傳深度驗證：MIME + 大小 + magic bytes + SVG 腳本掃描</li>
+      <li>下載檔名清洗，防止路徑穿越</li>
+      <li>隱私保護聲明與免責條款</li>
+    </ul>
+
+    <h3 class="text-sm font-semibold text-slate-700 mt-3 mb-2"><span class="tag tag-perf">效能 &amp; 基建</span></h3>
+    <ul class="text-sm space-y-1 ml-4 list-disc list-outside text-slate-600">
+      <li>PWA 支援：Service Worker + manifest.json，可離線使用</li>
+      <li>完整 SEO 標籤：Open Graph、Twitter Card、meta description</li>
+      <li>無障礙 (a11y)：aria-label、鍵盤導航、skip-to-content、reduced-motion</li>
+      <li>Tailwind CSS production build（minified 16KB）</li>
+      <li>GitHub Actions CI/CD 自動部署 + Lighthouse 審計</li>
+      <li>robots.txt + sitemap.xml + 404 頁面</li>
+      <li>可插拔隱私友善分析模組（預設關閉）</li>
+    </ul>
+  </article>
+
+  <hr class="border-slate-200 my-6" />
+  <p class="text-xs text-slate-400">版號遵循 <a href="https://semver.org/lang/zh-TW/" class="text-indigo-400 hover:underline" target="_blank" rel="noopener noreferrer">語意化版本控制 (SemVer)</a> 規範。</p>
+</body>
+</html>
